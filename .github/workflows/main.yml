@@ -1,0 +1,50 @@
+# Tên của workflow, hiển thị trên tab Actions của GitHub
+name: Run Node.js App
+
+# Xác định các sự kiện kích hoạt workflow
+on:
+  # Chạy khi có push code lên nhánh 'main' (hoặc 'master' tùy theo repo của bạn)
+  push:
+    branches: [ main ] 
+  # Chạy khi có pull request nhắm vào nhánh 'main'
+  pull_request:
+    branches: [ main ]
+
+  # Cho phép chạy workflow thủ công từ tab Actions
+  workflow_dispatch:
+
+# Định nghĩa các công việc (jobs) sẽ chạy trong workflow
+jobs:
+  # Tên của công việc (bạn có thể đặt tên tùy ý)
+  build_and_run:
+    # Loại máy ảo để chạy công việc (ubuntu-latest là lựa chọn phổ biến)
+    runs-on: ubuntu-latest
+
+    # Các bước (steps) sẽ được thực thi tuần tự trong công việc này
+    steps:
+      # Bước 1: Checkout code từ repository về máy ảo runner
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Sử dụng action chính thức để checkout code
+
+      # Bước 2: Thiết lập môi trường Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Chỉ định phiên bản Node.js bạn muốn sử dụng
+          # Bạn nên thay '18.x' bằng phiên bản phù hợp với dự án của bạn (ví dụ: '16.x', '20.x')
+          node-version: '18.x' 
+          # Bật bộ nhớ đệm (cache) cho npm để tăng tốc các lần chạy sau
+          cache: 'npm' 
+
+      # Bước 3: Cài đặt các dependencies (thư viện)
+      # Sử dụng 'npm ci' thay vì 'npm i' trong CI/CD được khuyến nghị vì nó nhanh hơn và đáng tin cậy hơn
+      # 'npm ci' yêu cầu phải có file package-lock.json hoặc npm-shrinkwrap.json
+      # Nếu bạn không có file lock hoặc muốn dùng 'npm i', hãy thay đổi dòng dưới
+      - name: Install dependencies
+        run: npm ci 
+
+      # Bước 4: Chạy script Node.js của bạn
+      # Giả sử file chính của bạn là index.js
+      # Nếu file của bạn có tên khác, hãy thay 'index.js' bằng tên đúng
+      - name: Run script
+        run: node index.js 
